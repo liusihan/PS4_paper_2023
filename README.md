@@ -10,5 +10,11 @@ To address this gap, we evaluated and defined the PS4 thresholds using a large c
 
 
 
-##
-This repository contains the code relevant to the PS4 paper. 
+## Repository structure
+This repository contains the code relevant to the PS4 paper. The data and intermediate result files are hosted in the `results` directory. 
+
+1. **`posterior_probability`**
+
+2. **`local_posterior_probability`**
+
+3. **`plotting`**
