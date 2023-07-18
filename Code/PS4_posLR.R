@@ -131,55 +131,54 @@ evaluate<-function(data,start,end,dig_p){
 }
 
 ****************************************
-* Set1 analysis
-* AF_case >0 and AF_control >0
+* Correlation between gnomAD_EAS data 
+* and CDGC controls
 ****************************************
+#Read data
 AR<-read.table("9050_variants.txt",head=T,sep="\t")
 AR<-add(AR,25,25)
-#Read data
-ARall<-AR
-#Remove feature which level=0
-AR<-AR[AR$F_U!=0,]
-
-AR<-VUS_classify(AR)
-write.table(AR, file = "AR.OR.variant.txt", sep = "\t", col.names = T, row.names = F,quote=F)
-
-for(k in c(1:20)){
-    AR <- AR %>% mutate( test = ifelse(CI_LOW_gnomAD>1 & P_gnomAD<0.05 & OR_gnomAD>k, 1, 0)) %>% plyr::rename(c("test" = paste("OR_gnomAD_",k,sep="")))
-}
-
-for(k in c(1:20)){
-    AR <- AR %>% mutate( test = ifelse(CI_LOW>1 & P<0.05 & OR>k, 1, 0)) %>% plyr::rename(c("test" = paste("OR_",k,sep="")))
-}
-
-AR_1<-AR[(AR$Diagnosis_3=="P/LP")|(AR$Diagnosis_3=="B/LB")|(AR$VUS_class=="Cold" | AR$VUS_class=="IceCold" | AR$VUS_class=="Cool"),]
-
-
-AR_result<-evaluate(AR_1,42,61,35)
-
-write.table(AR_result, file = "AR_result.OR.txt", sep = "\t", col.names = T, row.names = F,quote=F)
-
-##Correlation between gnomAD and CDGC
 
 cor.test(AR[AR$F_U!=0 & AR$gnomAD_AF_EAS!=0,]$F_U,AR[AR$F_U!=0 & AR$gnomAD_AF_EAS!=0,]$gnomAD_AF_EAS) #0.517
 
-AR<-AR[AR$F_U!=0 & AR$gnomAD_AF_EAS!=0,]
+cor.test(AR[AR$F_U!=0 & AR$gnomAD_AF_EAS!=0,]$OR_CDGC,AR[AR$F_U!=0 & AR$gnomAD_AF_EAS!=0,]$OR_gnomAD) #0.726
 
-cor.test(AR$OR_CDGC,AR$OR_gnomAD) #0.726
+p1<-ggplot(AR[AR$F_U!=0 & AR$gnomAD_AF_EAS!=0,],mapping=aes(x=F_U,y=gnomAD_AF_EAS,colour="darkred"))+xlab("Allele frequency in CDGC controls")+ylab("Allele frequency in gnomAD East Asian population")+geom_point(size=3)+theme_classic()+theme(legend.position="none")+scale_color_paletteer_d("jcolors::pal5")+annotate(geom = "segment", x = 0, y = 0, xend = 1, yend = 1)+annotate("text", x = 0.1, y = 1, label = "R = 0.996",color="black",size = 6)
 
-p1<-ggplot(AR,mapping=aes(x=F_U,y=gnomAD_AF_EAS,colour="darkred"))+xlab("Allele frequency in CDGC controls")+ylab("Allele frequency in gnomAD East Asian population")+geom_point(size=3)+theme_classic()+theme(legend.position="none")+scale_color_paletteer_d("jcolors::pal5")+annotate(geom = "segment", x = 0, y = 0, xend = 1, yend = 1)+annotate("text", x = 0.1, y = 1, label = "R = 0.996",color="black",size = 6)
-
-p2<-ggplot(AR[AR$gnomAD_AF_EAS!=1,],mapping=aes(x=OR,y=OR_gnomAD,colour="darkred"))+xlab("OR by comparing with CDGC controls")+ylab("OR by comparing with gnomAD East Asian population")+geom_point(size=3)+theme_classic()+theme(legend.position="none")+scale_color_paletteer_d("ggthemes::excel_Badge")+annotate(geom = "segment", x = 0, y = 0, xend = 150, yend = 150)+annotate("text", x = 15, y = 150, label = "R = 0.719",color="black",size = 6)+xlim(0,150)
+p2<-ggplot(AR[AR$F_U!=0 & AR$gnomAD_AF_EAS!=0,],mapping=aes(x=OR,y=OR_gnomAD,colour="darkred"))+xlab("OR by comparing with CDGC controls")+ylab("OR by comparing with gnomAD East Asian population")+geom_point(size=3)+theme_classic()+theme(legend.position="none")+scale_color_paletteer_d("ggthemes::excel_Badge")+annotate(geom = "segment", x = 0, y = 0, xend = 150, yend = 150)+annotate("text", x = 15, y = 150, label = "R = 0.719",color="black",size = 6)+xlim(0,150)
 
 pdf("CDGC_gnomAD.pdf",height=5,width=10)
 (p1|p2)+ plot_annotation(tag_levels = 'A')
 dev.off()
 
 ****************************************
-* Set2 analysis
-* AF_case >0 and AF_control =0
+* Truth set1 analysis
+* AF_case >=0.0005 and AF_control >0
 ****************************************
-#Read data
+ARall<-AR
+#Extracted variants with AF_case >=0.0005 and AF_control >0
+AR<-AR[AR$F_U!=0 & AR$F_A>=0.0005,]
+
+#Classfing VUS into six levels
+AR<-VUS_classify(AR)
+write.table(AR, file = "AR.OR.variant.txt", sep = "\t", col.names = T, row.names = F,quote=F)
+
+#Adding the tag if a variant passed the OR cutoff
+for(k in c(1:20)){
+    AR <- AR %>% mutate( test = ifelse(CI_LOW>1 & P<0.05 & OR>k, 1, 0)) %>% plyr::rename(c("test" = paste("OR_",k,sep="")))
+}
+
+#removing PL-VUS
+AR_1<-AR[(AR$Diagnosis_3=="P/LP")|(AR$Diagnosis_3=="B/LB")|(AR$VUS_class=="Cold" | AR$VUS_class=="IceCold" | AR$VUS_class=="Cool"),]
+
+# calculate positive LR
+AR_result<-evaluate(AR_1,42,61,35)
+
+write.table(AR_result, file = "AR_result.OR.txt", sep = "\t", col.names = T, row.names = F,quote=F)
+
+****************************************
+* Truth set 3 analysis
+* AF_control =0
+****************************************
 AR<-ARall[ARall$F_U==0,]
 
 AR<-VUS_classify(AR)
@@ -194,24 +193,3 @@ AR_1<-AR[(AR$Diagnosis_3=="P/LP")|(AR$Diagnosis_3=="B/LB")|(AR$VUS_class=="Cold"
 AR_result<-evaluate(AR_1,41,60,35)
 
 write.table(AR_result, file = "AR_result.AC.txt", sep = "\t", col.names = T, row.names = F,quote=F)
-
-
-****************************************
-* AD set analysis
-* case >0 and control =0
-****************************************
-#Read data
-ADall<-AD
-#Remove feature which level=0
-AD<-AD[AD$AF_ctl==0,]
-
-for(k in c(2:10)){
-    AD <- AD %>% mutate( test = ifelse(AC_case>=k, 1, 0)) %>% plyr::rename(c("test" = paste("AC_",k,sep="")))
-}
-
-
-AD_1<-AD[(AD$Diagnosis_3=="P/LP")|(AD$Diagnosis_3=="B/LB")|(AD$VUS_class=="Cold" | AD$VUS_class=="IceCold" | AD$VUS_class=="Cool"),]
-
-AD_result<-evaluate(AD_1,27,35,24)
-
-write.table(AD_result, file = "AD_result.AC.txt", sep = "\t", col.names = T, row.names = F,quote=F)
