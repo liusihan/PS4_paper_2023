@@ -11,9 +11,9 @@ To address this gap, we evaluated and defined the PS4 thresholds using a large c
 
 
 ## Repository structure
-This repository contains the code relevant to the PS4 paper. All data relevant to the PS4 paper are included in the article or uploaded as Supplemental Material. Additional data are available from the corresponding author upon request. The bootstrap result files for the truth subset 2 are hosted in the `results` directory. 
+This repository contains the code relevant to the PS4 paper. All data relevant to the PS4 paper are included in the article or uploaded as Supplemental Material. Additional data are available from the corresponding author upon request. The bootstrap result files for the truth subset 2 are hosted in the `result` directory. 
 
-This `code` directory contains the actual implementation of the algorithm to calculate posterior probabilities and local posterior probabilities. Additionally, the code used to make the plots in the paper was stored in the `PS4_plot.R`.
+This `code` directory contains the actual implementation of the algorithm to calculate posterior probabilities and local posterior probabilities. Additionally, the code used to make the plots in the paper was stored in the `Figure_plot.R`.
 
 1. **`quantitative_thresholds.R`**: R Script for calculating the **`posterior probability`** and the **`local posterior probability`**. We defined the function of `VUS_classify` to classify VUS into 6 levels. Also, the function of `LR` was utilized for calculating Prevalence, Accuracy, PPV, NPV, F1 score, Sensitivity, Specificity, and posterior probability in truth subset 1 and truth subset 3. The local posterior probability was first developed by Pejaver, Vikas et al. to evaluate and define the thresholds for PP3 and BP4. We described the `local_lr` and `local_bootstrapped_lr` functions to calculate the local posterior probability and the one-sided 95% confidence bound for each estimated lr+. Briefly, the posterior probability was calculated for each OR value within the interval, considering a minimum of 100 pathogenic and non-pathogenic variants. Additionally, the one-sided 95% confidence bound for each estimated lr+  was determined through 10,000 bootstrapping iterations, enabling the assessment of evidence strength.  
 
