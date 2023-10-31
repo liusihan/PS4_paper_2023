@@ -22,11 +22,19 @@ library(ComplexHeatmap)
 library(cowplot)
 
 *****************************************
-  * Figure 2, Figure S2 and Figure S3
+* Figure 2 and Figure S3
 *****************************************
 
 AR<-read.table("9050.variants.allinfo.txt",header = T,sep="\t")
 AR$Classification<-factor(AR$Classification,levels = c('P', 'LP', 'VUS','LB','B'))
+
+p1<-ggplot(AR[AR$AF_control!=0 & AR$gnomAD_AF_EAS!=0,],mapping=aes(x=AF_control,y=gnomAD_AF_EAS,colour=Classification_3))+xlab("Allele frequency in CDGC controls")+ylab("Allele frequency in gnomAD East Asian population")+geom_point(size=2)+theme_classic()+scale_colour_manual(values=c("#780000","#bfdbf7","#84a98c"))+annotate(geom = "segment", x = 0, y = 0, xend = 0.03, yend = 0.03)+annotate("text", x = 0.003, y = 0.03, label = "R = 0.517",color="black",size = 5)+xlim(0,0.03)+ylim(0,0.03)+theme(legend.position="none")
+
+p2<-ggplot(AR[AR$AF_control!=0 & AR$gnomAD_AF_EAS!=0,],mapping=aes(x=OR,y=OR_gnomAD,colour=Classification_3))+xlab("OR by comparing with CDGC controls")+ylab("OR by comparing with gnomAD East Asian population")+geom_point(size=2)+theme_classic()+scale_colour_manual(values=c("#780000","#bfdbf7","#84a98c"))+annotate(geom = "segment", x = 0, y = 0, xend = 150, yend = 150)+annotate("text", x = 15, y = 150, label = "R = 0.726",color="black",size = 5)+xlim(0,150)+theme(legend.position="none")
+
+pdf("CDGC_gnomAD.pdf",height=5,width=10)
+(p1|p2)+ plot_annotation(tag_levels = 'A')
+dev.off()
 
 Figure2A<-ggdonut(data = AR, group_key = "Classification", count_type = "full",
                         label_info = "all", label_type = "horizon",
@@ -123,7 +131,9 @@ pdf("Figure2A.pdf")
 Figure2A
 dev.off()
 
-##Figure 3
+*****************************************
+* Figure 3
+*****************************************
 #Simulation to get the allele frequency threshold that variants have a CI_low >1
 simu_result<-as.data.frame(matrix(nrow=0,ncol=11))
 for(sample in c(100,200,300,400,500,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,12000,13845,15000,20000,50000,100000)){
