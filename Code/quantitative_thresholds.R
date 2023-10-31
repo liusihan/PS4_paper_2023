@@ -322,14 +322,6 @@ cor.test(AR[AR$AF_control!=0 & AR$gnomAD_AF_EAS!=0,]$AF_control,AR[AR$AF_control
 
 cor.test(AR[AR$AF_control!=0 & AR$gnomAD_AF_EAS!=0,]$OR,AR[AR$AF_control!=0 & AR$gnomAD_AF_EAS!=0,]$OR_gnomAD) #0.726
 
-p1<-ggplot(AR[AR$AF_control!=0 & AR$gnomAD_AF_EAS!=0,],mapping=aes(x=AF_control,y=gnomAD_AF_EAS,colour=Classification_3))+xlab("Allele frequency in CDGC controls")+ylab("Allele frequency in gnomAD East Asian population")+geom_point(size=2)+theme_classic()+scale_colour_manual(values=c("#780000","#bfdbf7","#84a98c"))+annotate(geom = "segment", x = 0, y = 0, xend = 0.03, yend = 0.03)+annotate("text", x = 0.003, y = 0.03, label = "R = 0.517",color="black",size = 5)+xlim(0,0.03)+ylim(0,0.03)+theme(legend.position="none")
-
-p2<-ggplot(AR[AR$AF_control!=0 & AR$gnomAD_AF_EAS!=0,],mapping=aes(x=OR,y=OR_gnomAD,colour=Classification_3))+xlab("OR by comparing with CDGC controls")+ylab("OR by comparing with gnomAD East Asian population")+geom_point(size=2)+theme_classic()+scale_colour_manual(values=c("#780000","#bfdbf7","#84a98c"))+annotate(geom = "segment", x = 0, y = 0, xend = 150, yend = 150)+annotate("text", x = 15, y = 150, label = "R = 0.726",color="black",size = 5)+xlim(0,150)+theme(legend.position="none")
-
-pdf("CDGC_gnomAD.pdf",height=5,width=10)
-(p1|p2)+ plot_annotation(tag_levels = 'A')
-dev.off()
-
 ****************************************
 * PM2 and PP3 evaluation
 ****************************************
